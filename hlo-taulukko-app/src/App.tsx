@@ -1,7 +1,6 @@
 /* Awesome personnel management table thingy by Arho M. 1/2022 */
 
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
 
 interface Dude {
@@ -118,7 +117,6 @@ class App extends React.Component<{},AppState> {
 		let d = this.getDude();
 		if (!d) return;
 		if (this.state.edit_id !== null) {
-			// keep the same id around when editing, despite the person temporarily not existing
 			d.person_id = this.state.edit_id;
 		}
 		this.state.dudes[d.person_id] = d;
@@ -135,11 +133,17 @@ class App extends React.Component<{},AppState> {
 	}
 
 	headerBut(key: string, label: string) {
-		let sk = this.state.sort_dir < 0 ? "sortN" : "sortP";
-		return ( <th
-				onClick={(e) => this.sortBy(key)}
-				className={this.state.sort_key == key ? sk : ""}
-				> {label} </th> );
+		const sk = this.state.sort_key;
+		const sd = this.state.sort_dir;
+		let c1 = (sd < 0 ? "sortDesc" : "sortAsc");
+		let c = sk == key ? c1 : "nosort";
+		return (
+		<th
+			className="headerBut"
+			onClick={(e) => this.sortBy(key)} >
+				<span className="label">{label}</span>
+				<span className={c}></span>
+		</th> );
 	}
 
 	editHim(dude:Dude) {
@@ -155,8 +159,8 @@ class App extends React.Component<{},AppState> {
 
 	emitDude(d: Dude) {
 		let buts = this.state.edit_id === null ? [
-			<button onClick={() => this.removeHim(d)}>Delete</button>,
-			<button onClick={() => this.editHim(d)}>Edit</button>
+			<button onClick={() => this.removeHim(d)}><span>Delete</span></button>,
+			<button onClick={() => this.editHim(d)}><span>Edit</span></button>
 		] : [
 			<span />,
 			<span />,
@@ -164,10 +168,10 @@ class App extends React.Component<{},AppState> {
 		buts = buts.map((x,i) => <td key={i}>{x}</td>);
 		return (
 		<tr key={d.person_id}>
-			<td>{d.person_id}</td>
-			<td>{d.lname}</td>
-			<td>{d.fname}</td>
-			<td>{d.age}</td>
+			<td><span>{d.person_id}</span></td>
+			<td><span>{d.lname}</span></td>
+			<td><span>{d.fname}</span></td>
+			<td><span>{d.age}</span></td>
 			{buts}
 		</tr>
 		);
@@ -177,10 +181,14 @@ class App extends React.Component<{},AppState> {
 		const age_of_universe=13.8e9;
 		return (
 <div className="App">
-	<table>
+	<div className="title">
+		<h1>KESÄ<wbr/>TÖIDEN SOVELLUS<wbr/>KEHITYS<wbr/>TEHTÄVÄT 21.12.2021</h1>
+		<h2>- by Arho Mahlamäki (1/2022)</h2>
+	</div>
+	<table className="ppl">
 		<thead>
 			<tr>
-				{this.headerBut("person_id", "Favorite number")}
+				{this.headerBut("person_id", "ID")}
 				{this.headerBut("lname", "Last name")}
 				{this.headerBut("fname", "First name")}
 				{this.headerBut("age", "Age")}
@@ -195,7 +203,9 @@ class App extends React.Component<{},AppState> {
 				<td><input id="fname" type="text" ref={this.inp_fname}/></td>
 				<td><input id="age" type="number" min="0" max={age_of_universe} ref={this.inp_age}/></td>
 				<td><button onClick={() => {this.newDude()}}>
-					{this.state.edit_id == null ? "Add" : "Ok"}
+					<span>
+						{this.state.edit_id == null ? "Add" : "Save"}
+					</span>
 				</button></td>
 				<td><button
 					style={this.state.edit_id !== null ? {visibility:"hidden"} : {}}

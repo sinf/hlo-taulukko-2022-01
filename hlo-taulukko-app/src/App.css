@@ -1,38 +1,131 @@
+
+* {
+	box-sizing: border-box;
+}
+
 .App {
-  text-align: center;
+	width: 100vw;
+	max-width: 60em;
+	margin: 0.5em auto 0.5em auto;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.App .title * {
+	text-align: center;
+	color: #3AA935;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.ppl {
+	border-spacing: 0;
+	padding: 0.25em;
+	margin: 0.25em;
+	width: 100%;
+	width: calc(100% - 0.5em);
+}
+.ppl tr:first-child td:last-child {
+	border-top-right-radius: 0.5em;
+}
+.ppl tr:first-child td:nth-of-type(2) {
+	border-top-left-radius: 0.5em;
+}
+.ppl tr:last-child td:last-child {
+	border-bottom-right-radius: 0.5em;
+}
+.ppl tr:last-child td:nth-of-type(2) {
+	border-bottom-left-radius: 0.5em;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.ppl tr {
+	height: 2em;
+	max-height: 2em;
+	min-height: 2em;
+}
+.ppl button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+}
+td input {
+	width: 100%;
+	min-width: 1em;
+}
+.ppl button, .ppl input {
+	background: beige;
+	padding: 0.4em;
+	border-radius: 0.5em;
+	border: 1px solid lightblue;
+}
+.ppl button:hover, .ppl input:hover {
+	background: lightgreen;
+}
+.ppl button:active, .ppl input:active {
+	background: white;
+	position: relative;
+	left: 0.1em;
+	top: 0.1em;
 }
 
-.App-link {
-  color: #61dafb;
+/* button columns */
+.ppl td:nth-of-type(5), .ppl td:nth-of-type(6) {
+	width: 4em;
+	max-width: 4em;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* person_id column */
+.ppl th:nth-of-type(1) {
+	display: none;
 }
+.ppl td:nth-of-type(1) {
+	width: 4em;
+	max-width: 4em;
+	display: none;
+}
+.ppl td:nth-of-type(1) span {
+	display: block;
+	width: 3em;
+	max-width: 3em;
+	margin-right: 1em;
+	overflow: hidden;
+}
+
+/* hightlight input row
+table.ppl tr:first-of-type td {
+	background: green;
+}
+*/
+
+.ppl tr:nth-of-type(2n+1) td {
+	background: lightblue;
+}
+
+.ppl tr:nth-of-type(2n) td {
+	background: beige;
+}
+
+.headerBut {
+	cursor: pointer;
+}
+.headerBut:hover {
+	text-decoration: underline;
+}
+.ppl th {
+	position: relative;
+}
+th span.label {
+	margin-right: 3.5em;
+}
+.sortAsc, .sortDesc {
+	position: absolute;
+	right: 0.5em;
+	top: 0.5em;
+	vertical-align: middle;
+	line-height: 1em;
+}
+.sortAsc:after {
+	content: "▲";
+}
+.sortDesc:after {
+	content: "▼";
+}
+
