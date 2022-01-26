@@ -3,6 +3,8 @@
 import React from 'react';
 import './App.css';
 
+const the_url = 'https://localhost:5001/api/MyPersonnel/';
+
 interface Dude {
 	person_id : number,
 	fname: string,
@@ -24,6 +26,10 @@ function choose<T>(x:T[]):T {
 	return x[Math.floor(Math.random() * x.length)];
 }
 
+function make_id() : number {
+	return Math.floor(Math.random() * 0xFFFFFFFF);
+}
+
 function randomDude() : Dude {
 	const f = ["Noah", "Oliver", "George", "Leo", "Theo", "Amelia", "Olivia", "Isla", "Ava", "Freya"];
 	const l = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Wilson"];
@@ -31,7 +37,7 @@ function randomDude() : Dude {
 		fname: choose(f),
 		lname: choose(l),
 		age: Math.floor(Math.random() * 120),
-		person_id: Math.random(),
+		person_id: make_id(),
 	};
 }
 
@@ -44,6 +50,15 @@ function loadData(): DudeTable {
 	return tab;
 }
 
+function parse_dude(ob:any) : Dude {
+	return {
+		person_id: parseInt(ob.id),
+		fname: ob.fname,
+		lname: ob.lname,
+		age: parseInt(ob.age)
+	};
+}
+
 class App extends React.Component<{},AppState> {
 
 	private readonly inp_fname = React.createRef<HTMLInputElement>();
@@ -53,7 +68,7 @@ class App extends React.Component<{},AppState> {
 	constructor(props:{}) {
 		super(props);
 		this.state = {
-			dudes : loadData(),
+			dudes : [],
 			sort_key : "person_id",
 			sort_dir : 1,
 			edit_id : null
@@ -62,6 +77,39 @@ class App extends React.Component<{},AppState> {
 		this.removeHim = this.removeHim.bind(this);
 		this.sortBy = this.sortBy.bind(this);
 		this.fillRandom = this.fillRandom.bind(this);
+		this.got_data = this.got_data.bind(this);
+		this.got_data1 = this.got_data1.bind(this);
+		this.send_data = this.send_data.bind(this);
+		this.update_data = this.update_data.bind(this);
+		this.try_remove = this.try_remove.bind(this);
+	}
+
+	componentDidMount() {
+		this.initialFetch();
+	}
+
+	got_data(data: any[]) {
+		//console.log("got something"); console.log(data);
+		for(let d of data.map(parse_dude)) {
+			this.state.dudes[d.person_id] = d;
+		}
+		this.setState(this.state);
+	}
+
+	got_data1(data: any) {
+		//console.log("got something"); console.log(data);
+		const d = parse_dude(data);
+		this.state.dudes[d.person_id] = d;
+		this.setState(this.state);
+	}
+
+	async initialFetch() {
+		console.log("fetch");
+		const resp = await fetch(the_url);
+
+		resp.json()
+		.then(res => this.got_data(res))
+		.catch(err => console.log(err));
 	}
 
 	sortBy(key: string) {
@@ -108,28 +156,73 @@ class App extends React.Component<{},AppState> {
 			fname:f.value,
 			lname:l.value,
 			age:parseInt(a.value),
-			person_id: Math.random()
+			person_id: make_id()
 		};
 		return d;
 	}
 
 	newDude() {
 		let d = this.getDude();
+		let e = this.state.edit_id;
 		if (!d) return;
-		if (this.state.edit_id !== null) {
-			d.person_id = this.state.edit_id;
-		}
-		this.state.dudes[d.person_id] = d;
 		this.fillInputs("", "", "");
-		this.setState({
-			dudes: this.state.dudes,
-			edit_id: null,
+		this.setState({edit_id: null});
+		if (e !== null) {
+			d.person_id = e;
+			this.update_data(d);
+		} else {
+			this.send_data(d);
+		}
+	}
+
+	async send_data(d: Dude) {
+		const resp = await fetch(the_url, {
+			method: "POST",
+			body: JSON.stringify({
+				// missing id
+				fname: d.fname,
+				lname: d.lname,
+				age: d.age
+			}),
+			headers: {
+				"Accept": "application/json",
+				"Content-Type": "application/json"
+			}
+		});
+		resp.json().then(this.got_data1);
+	}
+
+	async update_data(d: Dude) {
+		const resp = await fetch(the_url, {
+			method: "POST",
+			body: JSON.stringify({
+				id: d.person_id,
+				...d
+			}),
+			headers: {
+				"Accept": "application/json",
+				"Content-Type": "application/json"
+			}
+		});
+		resp.json().then(this.got_data1);
+	}
+
+	async try_remove(d: Dude) {
+		const resp = await fetch(the_url + d.person_id.toString(), {
+			method: "DELETE"
+		});
+		resp.text().then(() => {
+			let i = d.person_id;
+			console.log("removed");
+			console.log(i);
+			delete this.state.dudes[i];
+			this.setState(this.state);
 		});
 	}
 
 	removeHim(dude:Dude) {
-		delete this.state.dudes[dude.person_id];
-		this.setState(this.state);
+		console.log("try remove " + dude.person_id);
+		this.try_remove(dude);
 	}
 
 	headerBut(key: string, label: string) {
@@ -148,12 +241,12 @@ class App extends React.Component<{},AppState> {
 
 	editHim(dude:Dude) {
 		/* editing isn't really editing but deleting and then re-adding a new person */
-		this.removeHim(dude);
 		this.fillInputs(
 			dude.fname,
 			dude.lname,
 			dude.age.toString()
 		);
+		delete this.state.dudes[dude.person_id]; /* delete only on client side */
 		this.setState({edit_id : dude.person_id});
 	}
 
@@ -185,7 +278,7 @@ class App extends React.Component<{},AppState> {
 		<h1>KESÄ<wbr/>TÖIDEN SOVELLUS<wbr/>KEHITYS<wbr/>TEHTÄVÄT 21.12.2021</h1>
 		<h2>- by Arho Mahlamäki (1/2022)</h2>
 	</div>
-	<table className="ppl">
+	<table className="ppl debug">
 		<thead>
 			<tr>
 				{this.headerBut("person_id", "ID")}
