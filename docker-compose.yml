@@ -3,9 +3,13 @@ services:
   backend:
     build: ./backend
     ports:
-      - "5000:80"
+      - "5000:123"
+    environment:
+      - PORT=123
   frontend:
     build: ./hlo-taulukko-app
     ports:
-      - "3000:80"
+      - "3000:456"
+    environment:
+      - PORT=456
 
