@@ -77,21 +77,24 @@ namespace backend.Controllers
         [HttpPost]
         public async Task<ActionResult<Person>> PostPerson(Person person)
         {
-            _context.personnel.Add(person);
-            try
-            {
-                await _context.SaveChangesAsync();
+            bool update = false;
+            if (PersonExists(person.Id)) {
+                update = true;
+                _context.personnel.Update(person);
+            } else {
+                _context.personnel.Add(person);
             }
-            catch (DbUpdateException)
-            {
-                if (PersonExists(person.Id))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
+
+            try {
+                await _context.SaveChangesAsync();
+            } catch (DbUpdateException) {
+                throw;
+            }
+
+            if (update) {
+                Console.Write("\nUpdate {0} {1} {2} {3}\n", person.Id, person.lname, person.fname, person.age);
+            } else {
+                Console.Write("\nCreate {0} {1} {2} {3}\n", person.Id, person.lname, person.fname, person.age);
             }
 
             return CreatedAtAction(nameof(GetPerson), new { id = person.Id }, person);
@@ -109,6 +112,7 @@ namespace backend.Controllers
 
             _context.personnel.Remove(person);
             await _context.SaveChangesAsync();
+            Console.Write("\nDelete {0} {1} {2} {3}\n", person.Id, person.lname, person.fname, person.age);
 
             return NoContent();
         }
