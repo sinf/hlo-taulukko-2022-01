@@ -2,3 +2,6 @@ build:
   docker:
     web_server: backend/Dockerfile
     web_client: hlo-taulukko-app/Dockerfile
+run:
+  web_server: dotnet /app/backend.dll
+  web_client: /usr/sbin/nginx

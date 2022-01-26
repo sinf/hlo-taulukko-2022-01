@@ -1,16 +1,13 @@
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build-env
 WORKDIR /app
-
-COPY . .
-RUN find .
-
-#RUN dotnet add package Microsoft.VisualStudio.Web.CodeGeneration.Design --prerelease
-#RUN dotnet add package Microsoft.EntityFrameworkCore
-#RUN dotnet add package Microsoft.EntityFrameworkCore.Design --prerelease
-#RUN dotnet add package Microsoft.EntityFrameworkCore.SqlServer --prerelease
-#RUN dotnet add package Microsoft.EntityFrameworkCore.InMemory
-
+COPY *.csproj .
 RUN dotnet restore --disable-parallel
+
+COPY ./Models ./Models
+COPY ./Controllers ./Controllers
+COPY Program.cs .
+COPY appsettings.json .
+COPY appsettings.Development.json .
 
 RUN dotnet build -c Release --no-restore
 RUN dotnet publish -c Release -o out --no-restore
@@ -18,9 +15,11 @@ RUN dotnet publish -c Release -o out --no-restore
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
 WORKDIR /app
 COPY --from=build-env /app/out .
-COPY --from=build-env /app/Properties/launchSettings.json .
+COPY run_server.sh .
 
 RUN find .
 
-ENTRYPOINT [ "dotnet", "backend.dll" ]
+EXPOSE 80
+
+ENTRYPOINT [ "/app/run_server.sh" ]
 

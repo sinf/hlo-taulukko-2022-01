@@ -3,7 +3,8 @@
 import React from 'react';
 import './App.css';
 
-const the_url = 'http://localhost:5000/api/MyPersonnel/';
+//const the_url = 'http://localhost:5000/api/MyPersonnel/';
+const the_url = 'http://netum-rekry-person-thing.herokuapp.com:5000/api/MyPersonnel/';
 
 interface Dude {
 	person_id : number,

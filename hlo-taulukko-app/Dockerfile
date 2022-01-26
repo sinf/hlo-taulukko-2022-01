@@ -1,11 +1,25 @@
-FROM node:alpine AS build-env
+FROM node:14 AS build-env
 WORKDIR /app
-COPY . .
+COPY .npmrc /app/
+COPY package.json /app/
+RUN npm install --no-audit --prefer-offline
+COPY tsconfig.json .
+COPY public ./public
+COPY src ./src
+RUN find /app
 RUN npm run build
 
 FROM nginx
 COPY --from=build-env /app/build /app/www
-COPY ./nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build-env /app/package-lock.json /app/
+COPY ./default.conf /etc/nginx/conf.d/default.conf
+COPY ./nginx.conf /etc/nginx/nginx.conf
+COPY ./start_nginx.sh /app/
 
-ENTRYPOINT ["nginx"]
+EXPOSE 80
+
+RUN find /app
+RUN cat /etc/nginx/nginx.conf
+
+ENTRYPOINT ["/app/start_nginx.sh"]
 
