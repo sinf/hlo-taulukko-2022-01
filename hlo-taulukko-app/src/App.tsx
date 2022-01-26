@@ -3,7 +3,7 @@
 import React from 'react';
 import './App.css';
 
-const the_url = 'https://localhost:5001/api/MyPersonnel/';
+const the_url = 'http://localhost:5000/api/MyPersonnel/';
 
 interface Dude {
 	person_id : number,

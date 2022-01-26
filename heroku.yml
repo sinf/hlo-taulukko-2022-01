@@ -1,0 +1,4 @@
+build:
+  docker:
+    web_server: backend/Dockerfile
+    web_client: hlo-taulukko-app/Dockerfile
