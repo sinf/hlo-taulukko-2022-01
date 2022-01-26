@@ -1,8 +1,16 @@
 using Microsoft.EntityFrameworkCore;
 using MyApi.Models;
 using Microsoft.Extensions.DependencyInjection;
+var cors_thing = "_whatever";
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddCors(options => {
+	options.AddPolicy(name: cors_thing,
+		builder => {
+			builder.WithOrigins("*").AllowAnyHeader().AllowAnyMethod();
+		});
+});
 
 // Add services to the container.
 
@@ -25,6 +33,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors(cors_thing);
 app.UseAuthorization();
 
 app.MapControllers();
