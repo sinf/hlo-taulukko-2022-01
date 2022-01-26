@@ -73,13 +73,12 @@ td input {
 }
 
 /* person_id column */
-.ppl th:nth-of-type(1) {
-	display: none;
-}
+/* only show when table has class 'debug' */
+.ppl td:nth-of-type(1), .ppl th:nth-of-type(1) { display: none; }
+.ppl.debug td:nth-of-type(1), .ppl.debug th:nth-of-type(1) { display: table-cell; }
 .ppl td:nth-of-type(1) {
 	width: 4em;
 	max-width: 4em;
-	display: none;
 }
 .ppl td:nth-of-type(1) span {
 	display: block;
