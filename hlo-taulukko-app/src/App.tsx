@@ -3,8 +3,7 @@
 import React from 'react';
 import './App.css';
 
-//const the_url = 'http://localhost:5000/api/MyPersonnel/';
-const the_url = 'http://netum-rekry-person-thing.herokuapp.com:5000/api/MyPersonnel/';
+const the_url = process.env.REACT_APP_BACKEND_URL + "/api/MyPersonnel/";
 
 interface Dude {
 	person_id : number,
@@ -274,12 +273,13 @@ class App extends React.Component<{},AppState> {
 	render() {
 		const age_of_universe=13.8e9;
 		return (
-<div className="App">
+<div className="App debug">
 	<div className="title">
 		<h1>KESÄ<wbr/>TÖIDEN SOVELLUS<wbr/>KEHITYS<wbr/>TEHTÄVÄT 21.12.2021</h1>
 		<h2>- by Arho Mahlamäki (1/2022)</h2>
+		<div className="debug">Using backend from {the_url}</div>
 	</div>
-	<table className="ppl debug">
+	<table className="ppl">
 		<thead>
 			<tr>
 				{this.headerBut("person_id", "ID")}

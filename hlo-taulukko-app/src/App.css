@@ -9,6 +9,9 @@
 	margin: 0.5em auto 0.5em auto;
 }
 
+.App .debug { display: none; }
+.App.debug .debug { display: initial; }
+
 .App .title * {
 	text-align: center;
 	color: #3AA935;
@@ -75,7 +78,7 @@ td input {
 /* person_id column */
 /* only show when table has class 'debug' */
 .ppl td:nth-of-type(1), .ppl th:nth-of-type(1) { display: none; }
-.ppl.debug td:nth-of-type(1), .ppl.debug th:nth-of-type(1) { display: table-cell; }
+.App.debug .ppl td:nth-of-type(1), .ppl th:nth-of-type(1) { display: table-cell; }
 .ppl td:nth-of-type(1) {
 	width: 4em;
 	max-width: 4em;
