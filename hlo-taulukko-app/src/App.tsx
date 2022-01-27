@@ -4,6 +4,7 @@ import React from 'react';
 import './App.css';
 
 const the_url = process.env.REACT_APP_BACKEND_URL + "/api/MyPersonnel/";
+const enable_debug = false;
 
 interface Dude {
 	person_id : number,
@@ -273,7 +274,7 @@ class App extends React.Component<{},AppState> {
 	render() {
 		const age_of_universe=13.8e9;
 		return (
-<div className="App debug">
+<div className={"App" + (enable_debug ? " debug" : "")}>
 	<div className="title">
 		<h1>KESÄ<wbr/>TÖIDEN SOVELLUS<wbr/>KEHITYS<wbr/>TEHTÄVÄT 21.12.2021</h1>
 		<h2>- by Arho Mahlamäki (1/2022)</h2>

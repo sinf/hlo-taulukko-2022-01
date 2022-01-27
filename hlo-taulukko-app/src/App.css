@@ -77,8 +77,13 @@ td input {
 
 /* person_id column */
 /* only show when table has class 'debug' */
-.ppl td:nth-of-type(1), .ppl th:nth-of-type(1) { display: none; }
-.App.debug .ppl td:nth-of-type(1), .ppl th:nth-of-type(1) { display: table-cell; }
+
+.ppl td:nth-of-type(1),
+.ppl th:nth-of-type(1) { display: none; }
+
+.App.debug .ppl td:nth-of-type(1),
+.App.debug .ppl th:nth-of-type(1) { display: table-cell; }
+
 .ppl td:nth-of-type(1) {
 	width: 4em;
 	max-width: 4em;
