@@ -8,14 +8,14 @@ const enable_debug = false;
 
 console.log("using backend", the_url);
 
-interface Dude {
+interface Person {
 	person_id : number,
 	fname: string,
 	lname: string,
 	age: number
 }
-interface DudeTable {
-	[person_id: number]: Dude;
+interface PersonTable {
+	[person_id: number]: Person;
 }
 
 interface WhoIsInvalid {
@@ -23,7 +23,7 @@ interface WhoIsInvalid {
 }
 
 interface AppState {
-	dudes: DudeTable,
+	dudes: PersonTable,
 	invalid: WhoIsInvalid,
 	sort_key: string,
 	sort_dir: number,
@@ -38,7 +38,7 @@ function make_id() : number {
 	return Math.floor(Math.random() * 0xFFFFFFFF);
 }
 
-function randomDude() : Dude {
+function randomDude() : Person {
 	const f = ["Noah", "Oliver", "George", "Leo", "Theo", "Amelia", "Olivia", "Isla", "Ava", "Freya"];
 	const l = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Wilson"];
 	return {
@@ -49,8 +49,8 @@ function randomDude() : Dude {
 	};
 }
 
-function loadData(count: number): DudeTable {
-	let tab:DudeTable = {}
+function loadData(count: number): PersonTable {
+	let tab:PersonTable = {}
 	for(let i=0; i<count; ++i) {
 		let d = randomDude();
 		tab[d.person_id] = d;
@@ -58,7 +58,7 @@ function loadData(count: number): DudeTable {
 	return tab;
 }
 
-function parse_dude(ob:any) : Dude {
+function parse_dude(ob:any) : Person {
 	return {
 		person_id: parseInt(ob.id),
 		fname: ob.fname,
@@ -123,8 +123,8 @@ class App extends React.Component<{},AppState> {
 
 	got_data(data: any[]) {
 		//console.log("got something"); console.log(data);
-		//let temp:DudeTable = Object.assign({}, this.state.dudes);
-		let temp:DudeTable = {}; // replace everything
+		//let temp:PersonTable = Object.assign({}, this.state.dudes);
+		let temp:PersonTable = {}; // replace everything
 		for(let d of data.map(parse_dude)) {
 			temp[d.person_id] = d;
 		}
@@ -139,7 +139,7 @@ class App extends React.Component<{},AppState> {
 		// added (or edited) one row from this client
 		//console.log("got something"); console.log(data);
 		const d = parse_dude(data);
-		let temp:DudeTable = Object.assign({}, this.state.dudes);
+		let temp:PersonTable = Object.assign({}, this.state.dudes);
 		temp[d.person_id] = d;
 		this.setState({dudes: temp});
 		this.setValid(d);
@@ -182,7 +182,7 @@ class App extends React.Component<{},AppState> {
 		this.fillInputs(d.fname, d.lname, d.age.toString());
 	}
 
-	getDude(): Dude | null {
+	getDude(): Person | null {
 		let f = this.inp_fname?.current;
 		let l = this.inp_lname?.current;
 		let a = this.inp_age?.current;
@@ -193,7 +193,7 @@ class App extends React.Component<{},AppState> {
 		if (!this.validateInput(f.value,l.value,a.value)) {
 			return null;
 		}
-		let d:Dude = {
+		let d:Person = {
 			fname:f.value,
 			lname:l.value,
 			age:parseInt(a.value),
@@ -202,12 +202,12 @@ class App extends React.Component<{},AppState> {
 		return d;
 	}
 
-	setInvalid(d:Dude) {
+	setInvalid(d:Person) {
 		let inv:WhoIsInvalid = Object.assign({}, this.state.invalid);
 		inv[d.person_id] = true;
 		this.setState({invalid: inv});
 	}
-	setValid(d:Dude) {
+	setValid(d:Person) {
 		delete this.state.invalid[d.person_id];
 		this.setState({invalid: this.state.invalid});
 	}
@@ -227,7 +227,7 @@ class App extends React.Component<{},AppState> {
 		}
 	}
 
-	async send_data(d: Dude) {
+	async send_data(d: Person) {
 		await fetch(the_url, {
 			method: "POST",
 			body: JSON.stringify({
@@ -247,7 +247,7 @@ class App extends React.Component<{},AppState> {
 		.catch(err => console.log(err));
 	}
 
-	async update_data(d: Dude) {
+	async update_data(d: Person) {
 		await fetch(the_url, {
 			method: "POST",
 			body: JSON.stringify({
@@ -267,7 +267,7 @@ class App extends React.Component<{},AppState> {
 		.catch(err => console.log(err));
 	}
 
-	async try_remove(d: Dude) {
+	async try_remove(d: Person) {
 		this.setInvalid(d);
 		await fetch(the_url + d.person_id.toString(), {
 			method: "DELETE"
@@ -285,7 +285,7 @@ class App extends React.Component<{},AppState> {
 		.catch(err => console.log(err));
 	}
 
-	removeHim(dude:Dude) {
+	removeHim(dude:Person) {
 		console.log("try remove " + dude.person_id);
 		this.try_remove(dude);
 	}
@@ -304,7 +304,7 @@ class App extends React.Component<{},AppState> {
 		</th> );
 	}
 
-	editHim(dude:Dude) {
+	editHim(dude:Person) {
 		/* editing isn't really editing but deleting and then re-adding a new person */
 		this.fillInputs(
 			dude.fname,
@@ -315,7 +315,7 @@ class App extends React.Component<{},AppState> {
 		this.setState({edit_id : dude.person_id});
 	}
 
-	emitDude(d: Dude) {
+	emitDude(d: Person) {
 		let buts = (this.state.edit_id === null) && !(d.person_id in this.state.invalid) ? [
 			<button onClick={() => this.removeHim(d)}><span>Delete</span></button>,
 			<button onClick={() => this.editHim(d)}><span>Edit</span></button>
