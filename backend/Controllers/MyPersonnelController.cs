@@ -41,37 +41,6 @@ namespace backend.Controllers
             return person;
         }
 
-        // PUT: api/MyPersonnel/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutPerson(long id, Person person)
-        {
-            if (id != person.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(person).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PersonExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
         // POST: api/MyPersonnel
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -91,11 +60,8 @@ namespace backend.Controllers
                 throw;
             }
 
-            if (update) {
-                Console.Write("\nUpdate {0} {1} {2} {3}\n", person.Id, person.lname, person.fname, person.age);
-            } else {
-                Console.Write("\nCreate {0} {1} {2} {3}\n", person.Id, person.lname, person.fname, person.age);
-            }
+            var a = update ? "Update" : "Create";
+            Console.Write("\n{4} {0} {1} {2} {3}\n", person.Id, person.lname, person.fname, person.age, a);
 
             return CreatedAtAction(nameof(GetPerson), new { id = person.Id }, person);
         }
