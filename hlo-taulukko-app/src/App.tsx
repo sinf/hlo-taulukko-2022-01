@@ -6,6 +6,8 @@ import './App.css';
 const the_url = process.env.REACT_APP_BACKEND_URL + "/api/MyPersonnel/";
 const enable_debug = false;
 
+console.log("using backend", the_url);
+
 interface Dude {
 	person_id : number,
 	fname: string,
@@ -42,9 +44,9 @@ function randomDude() : Dude {
 	};
 }
 
-function loadData(): DudeTable {
+function loadData(count: number): DudeTable {
 	let tab:DudeTable = {}
-	for(let i=0; i<10; ++i) {
+	for(let i=0; i<count; ++i) {
 		let d = randomDude();
 		tab[d.person_id] = d;
 	}
@@ -91,17 +93,19 @@ class App extends React.Component<{},AppState> {
 
 	got_data(data: any[]) {
 		//console.log("got something"); console.log(data);
+		let temp:DudeTable = Object.assign({}, this.state.dudes);
 		for(let d of data.map(parse_dude)) {
-			this.state.dudes[d.person_id] = d;
+			temp[d.person_id] = d;
 		}
-		this.setState(this.state);
+		this.setState({dudes: temp});
 	}
 
 	got_data1(data: any) {
 		//console.log("got something"); console.log(data);
 		const d = parse_dude(data);
-		this.state.dudes[d.person_id] = d;
-		this.setState(this.state);
+		let temp:DudeTable = Object.assign({}, this.state.dudes);
+		temp[d.person_id] = d;
+		this.setState({dudes: temp});
 	}
 
 	async initialFetch() {
@@ -116,11 +120,11 @@ class App extends React.Component<{},AppState> {
 	sortBy(key: string) {
 		let s = this.state;
 		let d = s.sort_dir;
-		this.setState({sort_key: key, sort_dir: key == s.sort_key ? -d : d});
+		this.setState({sort_key: key, sort_dir: key === s.sort_key ? -d : d});
 	}
 
 	validateInput(f:string,l:string,a:string):boolean {
-		if (Math.max(f.length, l.length) == 0) {
+		if (Math.max(f.length, l.length) === 0) {
 			alert("Fill in at least either first or last name");
 			return false;
 		}
@@ -230,7 +234,7 @@ class App extends React.Component<{},AppState> {
 		const sk = this.state.sort_key;
 		const sd = this.state.sort_dir;
 		let c1 = (sd < 0 ? "sortDesc" : "sortAsc");
-		let c = sk == key ? c1 : "nosort";
+		let c = sk === key ? c1 : "nosort";
 		return (
 		<th
 			className="headerBut"
