@@ -62,6 +62,18 @@ function parse_dude(ob:any) : Dude {
 	};
 }
 
+function JSON_stringify_sorted(obj:any)
+{
+	let keys:any = {};
+	JSON.stringify(obj, (k,v) => (keys[k]=null, v)); // intentional comma operator
+	keys = Object.keys(keys).sort();
+	return JSON.stringify(obj, keys);
+}
+
+function deepEqual(a:any, b:any):boolean {
+	return JSON_stringify_sorted(a) === JSON_stringify_sorted(b);
+}
+
 class App extends React.Component<{},AppState> {
 
 	private readonly inp_fname = React.createRef<HTMLInputElement>();
@@ -89,18 +101,27 @@ class App extends React.Component<{},AppState> {
 
 	componentDidMount() {
 		this.initialFetch();
+
+		// Re-fetch the entire table all the time in case other clients also make changes
+		// this is really inefficient but probably ok for a small demo
+		setInterval(() => this.initialFetch(), 2000);
 	}
 
 	got_data(data: any[]) {
 		//console.log("got something"); console.log(data);
-		let temp:DudeTable = Object.assign({}, this.state.dudes);
+		//let temp:DudeTable = Object.assign({}, this.state.dudes);
+		let temp:DudeTable = {}; // replace everything
 		for(let d of data.map(parse_dude)) {
 			temp[d.person_id] = d;
 		}
-		this.setState({dudes: temp});
+		if (!deepEqual(temp, this.state.dudes)) {
+			console.log("fetch everything ", new Date().toISOString());
+			this.setState({dudes: temp});
+		}
 	}
 
 	got_data1(data: any) {
+		// added (or edited) one row from this client
 		//console.log("got something"); console.log(data);
 		const d = parse_dude(data);
 		let temp:DudeTable = Object.assign({}, this.state.dudes);
@@ -109,11 +130,10 @@ class App extends React.Component<{},AppState> {
 	}
 
 	async initialFetch() {
-		console.log("fetch");
-		const resp = await fetch(the_url);
-
-		resp.json()
-		.then(res => this.got_data(res))
+		//console.log("fetch");
+		await fetch(the_url)
+		.then(resp => resp.json())
+		.then(j => this.got_data(j))
 		.catch(err => console.log(err));
 	}
 
