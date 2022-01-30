@@ -16,6 +16,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:6.0
 WORKDIR /app
 COPY --from=build-env /app/out .
 COPY run_server.sh .
+COPY empty-personnel.db /app/personnel.db
 
 RUN find .
 

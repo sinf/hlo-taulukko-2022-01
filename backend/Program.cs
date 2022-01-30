@@ -5,6 +5,18 @@ var cors_thing = "_whatever";
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add services to the container.
+
+builder.Services.AddControllers();
+var db = Environment.GetEnvironmentVariable("DATABASE");
+if (db != null) {
+	Console.Write("\nUsing database: {0}\n", db);
+	builder.Services.AddSqlite<MyDbContext>("Data Source=" + db);
+} else {
+	Console.Write("\nUsing in-memory database\n");
+	builder.Services.AddDbContext<MyDbContext>(opts => opts.UseInMemoryDatabase("personnel"));
+}
+
 builder.Services.AddCors(options => {
 	options.AddPolicy(name: cors_thing,
 		builder => {
@@ -12,22 +24,13 @@ builder.Services.AddCors(options => {
 		});
 });
 
-// Add services to the container.
-
-builder.Services.AddControllers();
-builder.Services.AddDbContext<MyDbContext>(opt=>opt.UseInMemoryDatabase("personnel"));
-
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    //app.UseSwagger();
-    //app.UseSwaggerUI();
+if (app.Environment.IsDevelopment()) {
     app.UseDeveloperExceptionPage();
 }
 
