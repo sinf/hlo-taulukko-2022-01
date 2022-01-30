@@ -18,8 +18,13 @@ interface DudeTable {
 	[person_id: number]: Dude;
 }
 
+interface WhoIsInvalid {
+	[id: number]: boolean
+}
+
 interface AppState {
 	dudes: DudeTable,
+	invalid: WhoIsInvalid,
 	sort_key: string,
 	sort_dir: number,
 	edit_id: number | null,
@@ -40,7 +45,7 @@ function randomDude() : Dude {
 		fname: choose(f),
 		lname: choose(l),
 		age: Math.floor(Math.random() * 120),
-		person_id: make_id(),
+		person_id: make_id()
 	};
 }
 
@@ -74,6 +79,14 @@ function deepEqual(a:any, b:any):boolean {
 	return JSON_stringify_sorted(a) === JSON_stringify_sorted(b);
 }
 
+async function debug_delay(x:any):any {
+	if (enable_debug) {
+		console.log("debug delay");
+		await new Promise(a => setTimeout(a, 5000));
+	}
+	return x;
+}
+
 class App extends React.Component<{},AppState> {
 
 	private readonly inp_fname = React.createRef<HTMLInputElement>();
@@ -83,7 +96,8 @@ class App extends React.Component<{},AppState> {
 	constructor(props:{}) {
 		super(props);
 		this.state = {
-			dudes : [],
+			dudes : {},
+			invalid : {},
 			sort_key : "person_id",
 			sort_dir : 1,
 			edit_id : null
@@ -114,9 +128,10 @@ class App extends React.Component<{},AppState> {
 		for(let d of data.map(parse_dude)) {
 			temp[d.person_id] = d;
 		}
+		delete temp[this.state.edit_id];
 		if (!deepEqual(temp, this.state.dudes)) {
 			console.log("fetch everything ", new Date().toISOString());
-			this.setState({dudes: temp});
+			this.setState({dudes: temp, invalid: {}});
 		}
 	}
 
@@ -127,6 +142,7 @@ class App extends React.Component<{},AppState> {
 		let temp:DudeTable = Object.assign({}, this.state.dudes);
 		temp[d.person_id] = d;
 		this.setState({dudes: temp});
+		this.setValid(d);
 	}
 
 	async initialFetch() {
@@ -186,12 +202,23 @@ class App extends React.Component<{},AppState> {
 		return d;
 	}
 
+	setInvalid(d:Dude) {
+		let inv:WhoIsInvalid = Object.assign({}, this.state.invalid);
+		inv[d.person_id] = true;
+		this.setState({invalid: inv});
+	}
+	setValid(d:Dude) {
+		delete this.state.invalid[d.person_id];
+		this.setState({invalid: this.state.invalid});
+	}
+
 	newDude() {
 		let d = this.getDude();
 		let e = this.state.edit_id;
 		if (!d) return;
 		this.fillInputs("", "", "");
 		this.setState({edit_id: null});
+		this.setInvalid(d);
 		if (e !== null) {
 			d.person_id = e;
 			this.update_data(d);
@@ -201,7 +228,7 @@ class App extends React.Component<{},AppState> {
 	}
 
 	async send_data(d: Dude) {
-		const resp = await fetch(the_url, {
+		await fetch(the_url, {
 			method: "POST",
 			body: JSON.stringify({
 				// missing id
@@ -213,36 +240,49 @@ class App extends React.Component<{},AppState> {
 				"Accept": "application/json",
 				"Content-Type": "application/json"
 			}
-		});
-		resp.json().then(this.got_data1);
+		})
+		.then(debug_delay)
+		.then(x => x.json())
+		.then(this.got_data1)
+		.catch(err => console.log(err));
 	}
 
 	async update_data(d: Dude) {
-		const resp = await fetch(the_url, {
+		await fetch(the_url, {
 			method: "POST",
 			body: JSON.stringify({
 				id: d.person_id,
-				...d
+				fname: d.fname,
+				lname: d.lname,
+				age: d.age
 			}),
 			headers: {
 				"Accept": "application/json",
 				"Content-Type": "application/json"
 			}
-		});
-		resp.json().then(this.got_data1);
+		})
+		.then(debug_delay)
+		.then(x => x.json())
+		.then(this.got_data1)
+		.catch(err => console.log(err));
 	}
 
 	async try_remove(d: Dude) {
-		const resp = await fetch(the_url + d.person_id.toString(), {
+		this.setInvalid(d);
+		await fetch(the_url + d.person_id.toString(), {
 			method: "DELETE"
-		});
-		resp.text().then(() => {
+		})
+		.then(debug_delay)
+		.then(x => x.text())
+		.then(() => {
 			let i = d.person_id;
 			console.log("removed");
 			console.log(i);
+			this.setValid(d);
 			delete this.state.dudes[i];
 			this.setState(this.state);
-		});
+		})
+		.catch(err => console.log(err));
 	}
 
 	removeHim(dude:Dude) {
@@ -276,7 +316,7 @@ class App extends React.Component<{},AppState> {
 	}
 
 	emitDude(d: Dude) {
-		let buts = this.state.edit_id === null ? [
+		let buts = (this.state.edit_id === null) && !(d.person_id in this.state.invalid) ? [
 			<button onClick={() => this.removeHim(d)}><span>Delete</span></button>,
 			<button onClick={() => this.editHim(d)}><span>Edit</span></button>
 		] : [
