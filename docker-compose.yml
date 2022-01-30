@@ -3,16 +3,16 @@ services:
   backend:
     build: ./backend
     ports:
-      - "5000:123"
+      - "5005:123"
     environment:
       - PORT=123
   frontend:
     build:
       context: ./hlo-taulukko-app
       args:
-        - REACT_APP_BACKEND_URL=http://localhost:5000
+        - REACT_APP_BACKEND_URL=http://localhost:5005
     ports:
-      - "3000:456"
+      - "3005:456"
     environment:
       - PORT=456
 
