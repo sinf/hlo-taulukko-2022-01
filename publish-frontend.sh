@@ -1,6 +1,6 @@
 #!/bin/sh
 set -x -e
-source heroku-apps.cfg
+source ./heroku-apps.cfg
 cd hlo-taulukko-app
 app2=$heroku_backend_app
 app=$heroku_frontend_app
