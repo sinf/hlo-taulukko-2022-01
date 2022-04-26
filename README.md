@@ -13,8 +13,3 @@ Backend toiminnot:
 - Yksittäisen henkilön voi hakea id:n perusteella  
 - Henkilön voi lisätä/päivittää  
 - Henkilön voi poistaa  
-
-Kokeile:   
-[https://peaceful-castle-70736.herokuapp.com/](https://peaceful-castle-70736.herokuapp.com/)  
-
-
